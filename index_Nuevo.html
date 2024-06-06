@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <title>Document</title>
+
+</head>
+<body>
+    
+    <script>
+       window.onload =() => {
+           document.getElementById('dni').focus()
+       }
+        
+        function promise(url){
+            return new Promise (function(resolve, reject){
+                var request = new XMLHttpRequest()
+                request.open('GET', url)
+                request.responseType = 'json'
+                request.onload = function(){
+                    if(request.status == 200){
+                        resolve(request.response)
+                    }else{
+                        reject(Error( request.statusText))
+                    }
+                }
+
+                request.onerror = function(){
+                    reject(Error (request.statusText))
+                }
+
+                request.send()
+            })
+        }
+
+        promise('https://backend-idra.onrender.com/student/getAll')
+            .then((response) => {
+                var tbody=document.getElementsByTagName('tbody')[0]
+                response.forEach(e => {
+                    
+                    var row=tbody.insertRow()
+                    var cell=row.insertCell()
+                    cell.innerHTML=e.id
+                    cell=row.insertCell()
+                    cell.innerHTML=e.firstName
+                    cell=row.insertCell()
+                    cell.innerHTML=e.lastName
+                    cell=row.insertCell()
+                    cell.innerHTML=e.dni
+                    cell=row.insertCell()
+                    cell.innerHTML=e.email
+                    cell=row.insertCell()
+                })
+                
+               console.log(response)
+            })
+            .catch((reason) => {
+                console.log(Error(reason))
+            })
+    </script>
+    <table class="table table-striped-columns">
+        <thead>
+            <tr>
+                <th>ID  </th>
+                <th>Name  </th>
+                <th>LastName  </th>
+                <th>DNI  </th>
+                <th>email  </th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td></td>
+                <td>
+                   <input id="dni">
+                </td>
+                <td>
+                    <input id="firstName">
+                 </td>
+                 <td>
+                    <input id="lastName">
+                 </td>
+                 <td>
+                    <input id="email">
+                 </td>
+                 <td></td>
+                 <td><button>add</button></td>
+            </tr>
+
+        </tfoot>
+    </table>
+</body>
+</html>
+
+
+
