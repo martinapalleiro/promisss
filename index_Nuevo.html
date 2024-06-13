@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,14 +12,16 @@
 <body>
     
     <script>
-       window.onload =() => {
+        let url='https://backend-idra.onrender.com/student'
+
+        window.onload =() => {
            document.getElementById('dni').focus()
        }
         
-        function promise(url){
+        function getAll(){
             return new Promise (function(resolve, reject){
                 var request = new XMLHttpRequest()
-                request.open('GET', url)
+                request.open('GET', url,+'/getAll')
                 request.responseType = 'json'
                 request.onload = function(){
                     if(request.status == 200){
@@ -36,8 +39,73 @@
             })
         }
 
-        promise('https://backend-idra.onrender.com/student/getAll')
-            .then((response) => {
+
+        function add(){
+            return new Promise (function(resolve, reject){
+                var request = new XMLHttpRequest()
+                request.open('POST', url)
+                request.responseType = 'json'
+                request.setRequestHeader('Contect-Type', 'application/json')
+
+                var student=JSON.stringify({
+                    'dni':document.getElementById('dni').value,
+                    'lastName':document.getElementById('lastName').value,
+                    'firstName':document.getElementById('firstName').value,
+                    'email':document.getElementById('email').value,
+                    'cohort': '0',
+                    'status': 'activo',
+                    'gender':'masculino',
+                    'address': 'abc123',
+                    'phone': '000'
+                })
+
+                request.onload = function(){
+
+                    if(request.status == 201){
+                        resolve(request.response)
+                    }else{
+                        reject(Error( request.statusText))
+                    }
+                }
+
+                request.onerror = function(){
+                    reject(Error (request.statusText))
+                }
+
+                request.send(student)
+            })
+        }
+         
+        function remove(id){
+            return new Promise (function(resolve, reject){
+                var request = new XMLHttpRequest()
+                request.open('POST', url + '/' + id + '/delete' )
+                request.setRequestHeader('Contect-Type', 'application/json')
+                request.onload = function(){
+
+                    if(request.status == 200){
+                        resolve(request.response)
+                    }else{
+                        reject(Error( request.statusText))
+                    }
+                }
+
+                request.onerror = function(){
+                    reject(Error (request.statusText))
+                }
+
+                request.send()
+            })
+        }
+
+
+        
+
+        
+
+
+    function readStudent(){
+        getAll(url).then((response) => {
                 var tbody=document.getElementsByTagName('tbody')[0]
                 response.forEach(e => {
                     
@@ -53,6 +121,8 @@
                     cell=row.insertCell()
                     cell.innerHTML=e.email
                     cell=row.insertCell()
+                    button.addEventListener('click',()=>{deleteStudent(e.id)})
+                    cell.appendChild(button)
                 })
                 
                console.log(response)
@@ -60,6 +130,30 @@
             .catch((reason) => {
                 console.log(Error(reason))
             })
+        }
+
+            function save(){
+                add().then(()=> {
+                    readStudent()
+                }).catch((error)=>{
+                    console.log(error)
+                })
+                
+
+            }
+             function deleteStudent(){
+                remove(id).then(()=> {
+                    readStudent()
+                }).catch((error)=>{
+                    console.log(error)
+                }) 
+             }
+             function viewStudent(id){
+                 alert(id)
+             }
+
+
+
     </script>
     <table class="table table-striped-columns">
         <thead>
@@ -91,7 +185,7 @@
                     <input id="email">
                  </td>
                  <td></td>
-                 <td><button>add</button></td>
+                 <td><button onclick="save()" >add</button></td>
             </tr>
 
         </tfoot>
