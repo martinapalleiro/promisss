@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>TP Entregable</title>
+    <link rel='stylesheet' href='https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css'>
+    <script src='https://code.jquery.com/jquery-1.12.4.js'></script>
+    <script src='https://code.jquery.com/ui/1.12.1/jquery-ui.js'></script>
+    <script>
+        const url = 'https://backend-idra.onrender.com/student'
+
+        window.onload = () => {
+            $('#popUp').hide()
+            readStudents()
+        }
+
+        function readStudents() {
+            get().then(response => {
+                var tbody = document.getElementsByTagName('tbody')[0]
+                tbody.innerHTML = ''
+                response.forEach(e => {
+                    var row = tbody.insertRow()
+                    var cell = row.insertCell()
+                    cell.innerHTML = e.id
+                    cell = row.insertCell()
+                    cell.innerHTML = e.dni
+                    cell = row.insertCell()
+                    cell.innerHTML = e.lastName
+                    cell = row.insertCell()
+                    cell.innerHTML = e.firstName
+                    cell = row.insertCell()
+                    cell.innerHTML = e.email
+                    var student = JSON.stringify({
+                        'id': e.id,
+                        'dni': e.dni,
+                        'lastName': e.lastName,
+                        'firstName': e.firstName,
+                        'email': e.email,
+                    })
+                    cell = row.insertCell()
+                    cell.innerHTML = `<button onclick='viewStudent(${student})'>VIEW</button>`
+                    cell = row.insertCell()
+                    cell.innerHTML = `<button onclick='deleteStudent(${e.id})'>DELETE</button>`
+                })
+                document.getElementById('dni').value = ''
+                document.getElementById('lastName').value = ''
+                document.getElementById('firstName').value = ''
+                document.getElementById('email').value = ''
+                document.getElementById('dni').focus()
+            }).catch(error => {
+                console.log(error)
+            })
+        }
+
+        function createStudent() {
+            add().then(() => {
+                readStudents()
+            }).catch(error => {
+                console.log(error)
+            })
+        }
+
+        function deleteStudent(id) {
+            remove(id).then(() => {
+                readStudents()
+            }).catch(error => {
+                console.log(error)
+            })
+        }
+
+        function viewStudent(student) {
+            document.getElementsByName('id2')[0].value = student.id
+            document.getElementsByName('dni2')[0].value = student.dni
+            document.getElementsByName('lastName2')[0].value = student.lastName
+            document.getElementsByName('firstName2')[0].value = student.firstName
+            document.getElementsByName('email2')[0].value = student.email
+            $('#popUp').dialog({
+                closeText: ''
+            }).css('font-size', '13px')
+        }
+
+        function updateStudent() {
+            update().then(() => {
+                $('#popUp').dialog('close')
+                readStudents()
+            }).catch(error => {
+                console.log(error)
+            })
+        }
+
+        //PROMESAS
+
+        function get() {
+            return new Promise((resolve, reject) => {
+                var request = new XMLHttpRequest()
+                request.open('GET', url + '/getAll')
+                request.responseType = 'json'
+                request.onload = () => {
+                    if (request.status == 200) {
+                        resolve(request.response)
+                    } else {
+                        reject(request.statusText)
+                    }
+                }
+                request.onerror = () => {
+                    reject(request.responseText)
+                }
+                request.send()
+            })
+        }
+
+        function add() {
+            return new Promise((resolve, reject) => {
+                var request = new XMLHttpRequest()
+                request.open('POST', url)
+                request.setRequestHeader('Content-Type', 'application/json')
+                var student = JSON.stringify({
+                    'dni': document.getElementById('dni').value,
+                    'lastName': document.getElementById('lastName').value,
+                    'firstName': document.getElementById('firstName').value,
+                    'email': document.getElementById('email').value,
+                    'cohort': '0',
+                    'status': 'activo',
+                    'gender': 'masculino',
+                    'address': 'abc123',
+                    'phone': '000'
+                })
+                request.onload = () => {
+                    if (request.status == 201) {
+                        resolve(request.response)
+                    } else {
+                        reject(request.statusText)
+                    }
+                }
+                request.onerror = () => {
+                    reject(request.responseText)
+                }
+                request.send(student)
+            })
+        }
+
+        function remove(id) {
+            return new Promise((resolve, reject) => {
+                var request = new XMLHttpRequest()
+                request.open('POST', url + '/' + id + '/delete')
+                request.setRequestHeader('Content-Type', 'application/json')
+                request.onload = () => {
+                    if (request.status == 200) {
+                        resolve(request.response)
+                    } else {
+                        reject(request.statusText)
+                    }
+                }
+                request.onerror = () => {
+                    reject(request.responseText)
+                }
+                request.send()
+            })
+        }
+
+        function update() {
+            return new Promise((resolve, reject) => {
+                var request = new XMLHttpRequest()
+                request.open('POST', url + '/' + document.getElementsByName('id2')[0].value + '/update')
+                request.setRequestHeader('Content-Type', 'application/json')
+                var student = JSON.stringify({
+                    'dni': document.getElementsByName('dni2')[0].value,
+                    'lastName': document.getElementsByName('lastName2')[0].value,
+                    'firstName': document.getElementsByName('firstName2')[0].value,
+                    'email': document.getElementsByName('email2')[0].value,
+                    'cohort': '0',
+                    'status': 'activo',
+                    'gender': 'masculino',
+                    'address': 'abc123',
+                    'phone': '000'
+                })
+                request.onload = () => {
+                    if (request.status == 200) {
+                        resolve(request.response)
+                    } else {
+                        reject(request.statusText)
+                    }
+                }
+                request.onerror = () => {
+                    reject(request.responseText)
+                }
+                request.send(student)
+            })
+        }
+    </script>
+</head>
+
+<body>
+    <table style='border: 1px solid'>
+        <thead>
+            <tr>
+                <td>ID</td>
+                <td>DNI</td>
+                <td>LAST NAME</td>
+                <td>FIRST NAME</td>
+                <td>EMAIL</td>
+                <td colspan='2'></td>
+            </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+            <tr>
+                <td></td>
+                <td><input id='dni' /></td>
+                <td><input id='lastName' /></td>
+                <td><input id='firstName' /></td>
+                <td><input id='email' /></td>
+                <td colspan='2' style='text-align: center'><button onclick='createStudent()'>ADD</button></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div id='popUp'>
+        <table>
+            <tr>
+                <td><label for='id2' style='font-weight: bold'>ID</label></td>
+                <td><input name='id2' style='text-align: right' readonly /></td>
+            </tr>
+            <tr>
+                <td><label for='dni2' style='font-weight: bold'>DNI</label></td>
+                <td><input name='dni2' style='text-align: right' /></td>
+            </tr>
+            <tr>
+                <td><label for='lastName2' style='font-weight: bold'>LAST NAME</label></td>
+                <td><input name='lastName2' style='text-align: right' /></td>
+            </tr>
+            <tr>
+                <td><label for='firstName2' style='font-weight: bold'>FIRST NAME</label></td>
+                <td><input name='firstName2' style='text-align: right' /></td>
+            </tr>
+            <tr>
+                <td><label for='email2' style='font-weight: bold'>EMAIL</label></td>
+                <td><input name='email2' style='text-align: right' /></td>
+            </tr>
+            <tr>
+                <td colspan='2' style='text-align: center'><button onclick='updateStudent()'>UPDATE</button></td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>

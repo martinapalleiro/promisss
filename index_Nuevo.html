@@ -14,14 +14,18 @@
     <script>
         let url='https://backend-idra.onrender.com/student'
 
+        
         window.onload =() => {
-           document.getElementById('dni').focus()
-       }
+            document.getElementById('dni').focus()
+            readStudent()
+            $('#popUp').hide()
+
+        }
         
         function getAll(){
             return new Promise (function(resolve, reject){
                 var request = new XMLHttpRequest()
-                request.open('GET', url,+'/getAll')
+                request.open('GET', url +'/getAll')
                 request.responseType = 'json'
                 request.onload = function(){
                     if(request.status == 200){
@@ -72,7 +76,7 @@
                     reject(Error (request.statusText))
                 }
 
-                request.send(student)
+                request.send(student) //aca esta el error
             })
         }
          
@@ -105,7 +109,7 @@
 
 
     function readStudent(){
-        getAll(url).then((response) => {
+        getAll().then((response) => {
                 var tbody=document.getElementsByTagName('tbody')[0]
                 response.forEach(e => {
                     
@@ -121,8 +125,21 @@
                     cell=row.insertCell()
                     cell.innerHTML=e.email
                     cell=row.insertCell()
-                    button.addEventListener('click',()=>{deleteStudent(e.id)})
-                    cell.appendChild(button)
+                    
+                var student=JSON.stringify({
+                    'dni':document.getElementById('dni').value,
+                    'lastName':document.getElementById('lastName').value,
+                    'firstName':document.getElementById('firstName').value,
+                    'email':document.getElementById('email').value,
+                    'cohort': '0',
+                    'status': 'activo',
+                    'gender':'masculino',
+                    'address': 'abc123',
+                    'phone': '000'
+                })
+                    cell.innerHTML='<button onclick="viewStudent('+student+')">ver</button>'
+                    cell=row.insertCell()
+                    cell.innerHTML='<button onclick="deleteStudent('+e.id+')">borrar</button>'
                 })
                 
                console.log(response)
@@ -141,16 +158,24 @@
                 
 
             }
-             function deleteStudent(){
+             
+            function deleteStudent(){
                 remove(id).then(()=> {
                     readStudent()
                 }).catch((error)=>{
                     console.log(error)
                 }) 
              }
-             function viewStudent(id){
-                 alert(id)
-             }
+            function viewStudent(student){
+                document.getElementsByName('id2')[0].value = student.id
+                document.getElementsByName('dni2')[0].value = student.dni
+                document.getElementsByName('lastName2')[0].value = student.lastName
+                document.getElementsByName('firstName2')[0].value = student.firstName
+                document.getElementsByName('email2')[0].value = student.email
+                $('#popUp').dialog({
+                    closeText: ''
+                }).css('font-size', '13px')
+            }
 
 
 
@@ -190,6 +215,38 @@
 
         </tfoot>
     </table>
+
+    <div id='popUp'>
+        <table>
+            <tr>
+                <td><label for='id2' style='font-weight: bold'>ID</label></td>
+                <td><input name='id2' style='text-align: right' readonly /></td>
+            </tr>
+
+            <tr>
+                <td><label for='dni2' style='font-weight: bold'>DNI</label></td>
+                <td><input name='dni2' style='text-align: right' /></td>
+            </tr>
+
+            <tr>
+                <td><label for='lastName2' style='font-weight: bold'>LAST NAME</label></td>
+                <td><input name='lastName2' style='text-align: right' /></td>
+            </tr>
+
+            <tr>
+                <td><label for='firstName2' style='font-weight: bold'>FIRST NAME</label></td>
+                <td><input name='firstName2' style='text-align: right' /></td>
+            </tr>
+
+            <tr>
+                <td><label for='email2' style='font-weight: bold'>EMAIL</label></td>
+                <td><input name='email2' style='text-align: right' /></td>
+            </tr>
+            <tr>
+                <td colspan='2' style='text-align: center'><button onclick='updateStudent()'>UPDATE</button></td>
+            </tr>
+        </table>
+    </div>
 </body>
 </html>
 
