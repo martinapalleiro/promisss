@@ -44,39 +44,33 @@
         }
 
 
-        function add(){
-            return new Promise (function(resolve, reject){
+        function add() {
+            return new Promise((resolve, reject) => {
                 var request = new XMLHttpRequest()
                 request.open('POST', url)
-                request.responseType = 'json'
-                request.setRequestHeader('Contect-Type', 'application/json')
-
-                var student=JSON.stringify({
-                    'dni':document.getElementById('dni').value,
-                    'lastName':document.getElementById('lastName').value,
-                    'firstName':document.getElementById('firstName').value,
-                    'email':document.getElementById('email').value,
+                request.setRequestHeader('Content-Type', 'application/json')
+                var student = JSON.stringify({
+                    'dni': document.getElementById('dni').value,
+                    'lastName': document.getElementById('lastName').value,
+                    'firstName': document.getElementById('firstName').value,
+                    'email': document.getElementById('email').value,
                     'cohort': '0',
                     'status': 'activo',
-                    'gender':'masculino',
+                    'gender': 'masculino',
                     'address': 'abc123',
                     'phone': '000'
                 })
-
-                request.onload = function(){
-
-                    if(request.status == 201){
+                request.onload = () => {
+                    if (request.status == 201) {
                         resolve(request.response)
-                    }else{
-                        reject(Error( request.statusText))
+                    } else {
+                        reject(request.statusText)
                     }
                 }
-
-                request.onerror = function(){
-                    reject(Error (request.statusText))
+                request.onerror = () => {
+                    reject(request.responseText)
                 }
-
-                request.send(student) //aca esta el error
+                request.send(student)
             })
         }
          
@@ -108,48 +102,45 @@
         
 
 
-    function readStudent(){
-        getAll().then((response) => {
-                var tbody=document.getElementsByTagName('tbody')[0]
+        function readStudents() {
+            get().then(response => {
+                var tbody = document.getElementsByTagName('tbody')[0]
+                tbody.innerHTML = ''
                 response.forEach(e => {
-                    
-                    var row=tbody.insertRow()
-                    var cell=row.insertCell()
-                    cell.innerHTML=e.id
-                    cell=row.insertCell()
-                    cell.innerHTML=e.firstName
-                    cell=row.insertCell()
-                    cell.innerHTML=e.lastName
-                    cell=row.insertCell()
-                    cell.innerHTML=e.dni
-                    cell=row.insertCell()
-                    cell.innerHTML=e.email
-                    cell=row.insertCell()
-                    
-                var student=JSON.stringify({
-                    'dni':document.getElementById('dni').value,
-                    'lastName':document.getElementById('lastName').value,
-                    'firstName':document.getElementById('firstName').value,
-                    'email':document.getElementById('email').value,
-                    'cohort': '0',
-                    'status': 'activo',
-                    'gender':'masculino',
-                    'address': 'abc123',
-                    'phone': '000'
+                    var row = tbody.insertRow()
+                    var cell = row.insertCell()
+                    cell.innerHTML = e.id
+                    cell = row.insertCell()
+                    cell.innerHTML = e.dni
+                    cell = row.insertCell()
+                    cell.innerHTML = e.lastName
+                    cell = row.insertCell()
+                    cell.innerHTML = e.firstName
+                    cell = row.insertCell()
+                    cell.innerHTML = e.email
+                    var student = JSON.stringify({
+                        'id': e.id,
+                        'dni': e.dni,
+                        'lastName': e.lastName,
+                        'firstName': e.firstName,
+                        'email': e.email,
+                    })
+                    cell = row.insertCell()
+                    cell.innerHTML = `<button onclick='viewStudent(${student})'>VIEW</button>`
+                    cell = row.insertCell()
+                    cell.innerHTML = `<button onclick='deleteStudent(${e.id})'>DELETE</button>`
                 })
-                    cell.innerHTML='<button onclick="viewStudent('+student+')">ver</button>'
-                    cell=row.insertCell()
-                    cell.innerHTML='<button onclick="deleteStudent('+e.id+')">borrar</button>'
-                })
-                
-               console.log(response)
+                document.getElementById('dni').value = ''
+                document.getElementById('lastName').value = ''
+                document.getElementById('firstName').value = ''
+                document.getElementById('email').value = ''
+                document.getElementById('dni').focus()
+            }).catch(error => {
+                console.log(error)
             })
-            .catch((reason) => {
-                console.log(Error(reason))
-            })
-        }
 
-            function save(){
+        }
+            function createStudent(){
                 add().then(()=> {
                     readStudent()
                 }).catch((error)=>{
@@ -176,6 +167,15 @@
                     closeText: ''
                 }).css('font-size', '13px')
             }
+            function updateStudent() {
+            update().then(() => {
+                $('#popUp').dialog('close')
+                readStudents()
+            }).catch(error => {
+                console.log(error)
+            })
+        }
+
 
 
 
@@ -188,8 +188,7 @@
                 <th>LastName  </th>
                 <th>DNI  </th>
                 <th>email  </th>
-                <th></th>
-                <th></th>
+                <th colspan='2'></th>
             </tr>
         </thead>
         <tbody>
@@ -210,40 +209,36 @@
                     <input id="email">
                  </td>
                  <td></td>
-                 <td><button onclick="save()" >add</button></td>
+                 <td><button onclick="createStudent()" >add</button></td>
             </tr>
 
         </tfoot>
     </table>
 
-    <div id='popUp'>
+     <div id='popUp' style="display: none;">
         <table>
             <tr>
                 <td><label for='id2' style='font-weight: bold'>ID</label></td>
                 <td><input name='id2' style='text-align: right' readonly /></td>
             </tr>
-
             <tr>
                 <td><label for='dni2' style='font-weight: bold'>DNI</label></td>
                 <td><input name='dni2' style='text-align: right' /></td>
             </tr>
-
             <tr>
-                <td><label for='lastName2' style='font-weight: bold'>LAST NAME</label></td>
+                <td><label for='lastName2' style='font-weight: bold'>APELLIDO </label></td>
                 <td><input name='lastName2' style='text-align: right' /></td>
             </tr>
-
             <tr>
-                <td><label for='firstName2' style='font-weight: bold'>FIRST NAME</label></td>
+                <td><label for='firstName2' style='font-weight: bold'>NOMBRE</label></td>
                 <td><input name='firstName2' style='text-align: right' /></td>
             </tr>
-
             <tr>
                 <td><label for='email2' style='font-weight: bold'>EMAIL</label></td>
                 <td><input name='email2' style='text-align: right' /></td>
             </tr>
             <tr>
-                <td colspan='2' style='text-align: center'><button onclick='updateStudent()'>UPDATE</button></td>
+                <td colspan='2' style='text-align: center'><button onclick='updateStudent()'>MODIFICAR</button></td>
             </tr>
         </table>
     </div>
