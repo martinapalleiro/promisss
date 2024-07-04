@@ -73,7 +73,35 @@
                 request.send(student)
             })
         }
-         
+          function update() {
+            return new Promise((resolve, reject) => {
+                var request = new XMLHttpRequest()
+                request.open('POST', url + '/' + document.getElementsByName('id2')[0].value + '/update')
+                request.setRequestHeader('Content-Type', 'application/json')
+                var student = JSON.stringify({
+                    'dni': document.getElementsByName('dni2')[0].value,
+                    'lastName': document.getElementsByName('lastName2')[0].value,
+                    'firstName': document.getElementsByName('firstName2')[0].value,
+                    'email': document.getElementsByName('email2')[0].value,
+                    'cohort': '0',
+                    'status': 'activo',
+                    'gender': 'masculino',
+                    'address': 'abc123',
+                    'phone': '000'
+                })
+                request.onload = () => {
+                    if (request.status == 200) {
+                        resolve(request.response)
+                    } else {
+                        reject(request.statusText)
+                    }
+                }
+                request.onerror = () => {
+                    reject(request.responseText)
+                }
+                request.send(student)
+            })
+        }
         function remove(id){
             return new Promise (function(resolve, reject){
                 var request = new XMLHttpRequest()
